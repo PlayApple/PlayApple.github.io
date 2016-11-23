@@ -1,0 +1,589 @@
+<!DOCTYPE html><html lang="zh-cn"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="Write the code. Change the world."><title>使用Swift开发一个MacOS的菜单状态栏App | Play Apple</title><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/5.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.0/grids-responsive-min.css"><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">使用Swift开发一个MacOS的菜单状态栏App</h1><a id="logo" href="/.">Play Apple</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> Start</i></a><a href="/archives/"><i class="fa fa-archive"> Archiv</i></a><a href="/about/"><i class="fa fa-user"> Über</i></a><a href="/atom.xml"><i class="fa fa-rss"> RSS</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">使用Swift开发一个MacOS的菜单状态栏App</h1><div class="post-meta">Jul 30, 2016<span> | </span><span class="category"><a href="/categories/IPhone/">IPhone</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> Hits</span></span></div><div class="post-content"><p>猴子原创，欢迎转载。转载请注明： 转载自Cocos2Der-CSDN，谢谢！<br>原文地址: <a href="http://blog.csdn.net/cocos2der/article/details/52054107" target="_blank" rel="external">http://blog.csdn.net/cocos2der/article/details/52054107</a></p>
+<p>这两天突然想看看OSX下的App开发，看了几篇文章。下面这一篇我觉得入门是非常好的。我仅转述为中文，并非原文翻译。原文地址：<a href="http://footle.org/WeatherBar/" target="_blank" rel="external">http://footle.org/WeatherBar/</a></p>
+<p>下面开始介绍如何使用Swift开发一个Mac Menu Bar（Status Bar） App。通过做一个简单的天气app。天气数据来源于<a href="http://openweathermap.org" target="_blank" rel="external">OpenWeatherMap</a></p>
+<p>完成后的效果如下：<br><img src="http://img.blog.csdn.net/20160728102800287" alt="这里写图片描述"></p>
+<h3 id="一、开始建立工程"><a href="#一、开始建立工程" class="headerlink" title="一、开始建立工程"></a>一、开始建立工程</h3><p>打开Xcode，Create a New Project or File ⟶ New ⟶ Project ⟶ Application ⟶ Cocoa Application （ OS X 这一栏）。点击下一步。<br><img src="http://img.blog.csdn.net/20160728103042775" alt="这里写图片描述"></p>
+<h3 id="二、开始代码工作"><a href="#二、开始代码工作" class="headerlink" title="二、开始代码工作"></a>二、开始代码工作</h3><ol>
+<li><p>打开MainMenu.xib，删除默认的windows和menu菜单。因为我们是状态栏app，不需要菜单栏，不需要主窗口。<br><img src="http://img.blog.csdn.net/20160728103229456" alt="这里写图片描述"></p>
+</li>
+<li><p>添加一个Menu菜单<br><img src="http://img.blog.csdn.net/20160728103404529" alt="这里写图片描述"><br>删除其中默认的2个子菜单选项，仅保留1个。并将保留的这个改名为“Quit”。</p>
+</li>
+<li><p>打开双视图绑定Outlet</p>
+</li>
+</ol>
+<ul>
+<li>将Menu Outlet到AppDelegate，命名为statusMenu<br><img src="http://img.blog.csdn.net/20160728103722958" alt="这里写图片描述"></li>
+</ul>
+<ul>
+<li><p>将子菜单Quit绑定Action到AppDelegate，命名为quitClicked<br><img src="http://img.blog.csdn.net/20160728103911287" alt="这里写图片描述"></p>
+</li>
+<li><p>你可以删除 <code>@IBOutlet weak var window: NSWindow!</code> ，这个app中用不上。</p>
+</li>
+</ul>
+<ol>
+<li>代码</li>
+</ol>
+<ul>
+<li>在AppDelegate.swift中statusMenu下方添加<br><code>let statusItem = NSStatusBar.systemStatusBar().statusItemWithLength(NSVariableStatusItemLength)</code></li>
+</ul>
+<ul>
+<li><p>applicationDidFinishLaunching函数中添加：</p>
+<p>statusItem.title = “WeatherBar”<br>statusItem.menu = statusMenu<br>`</p>
+</li>
+<li><p>在quitClicked中添加：</p>
+<pre>`NSApplication.sharedApplication().terminate(self)
+`</pre>
+
+<pre><code>*   此时你的代码应该如下：
+</code></pre><pre>`import Cocoa
+
+@NSApplicationMain
+class AppDelegate: NSObject, NSApplicationDelegate {
+
+    @IBOutlet weak var statusMenu: NSMenu!
+
+    let statusItem = NSStatusBar.systemStatusBar().statusItemWithLength(NSVariableStatusItemLength)
+
+    @IBAction func quitClicked(sender: NSMenuItem) {
+        NSApplication.sharedApplication().terminate(self)
+    }
+
+    func applicationDidFinishLaunching(aNotification: NSNotification) {
+        statusItem.title = "WeatherBar"
+        statusItem.menu = statusMenu
+    }
+
+    func applicationWillTerminate(aNotification: NSNotification) {
+        // Insert code here to tear down your application
+    }
+
+}
+`</pre>
+
+<p>运行，你可以看到一个状态栏了。</p>
+<h3 id="三、进阶一步，让App变得更好"><a href="#三、进阶一步，让App变得更好" class="headerlink" title="三、进阶一步，让App变得更好"></a>三、进阶一步，让App变得更好</h3><p>你应该注意到了，当你运行后，底部Dock栏里出现了一个App启动的Icon。但实际上我们也不需要这个启动icon，打开Info，添加 “Application is agent (UIElement)”为YES。<br><img src="http://img.blog.csdn.net/20160728104923396" alt="这里写图片描述"></p>
+<p>运行一下，不会出现dock启动icon了。</p>
+<h3 id="四、添加状态栏Icon"><a href="#四、添加状态栏Icon" class="headerlink" title="四、添加状态栏Icon"></a>四、添加状态栏Icon</h3><p>状态栏icon尺寸请使用18x18<img src="http://img.blog.csdn.net/20160728105221149" alt="这里写图片描述">, 36x36(@2x)<img src="http://img.blog.csdn.net/20160728105242277" alt="这里写图片描述">, 54x54(@3x)，添加这1x和2x两张图到Assets.xcassets中。<br><img src="http://img.blog.csdn.net/20160728105405481" alt="这里写图片描述"></p>
+<p>在applicationDidFinishLaunching中，修改为如下：</p>
+<pre>`let icon = NSImage(named: "statusIcon")
+icon?.template = true // best for dark mode
+statusItem.image = icon
+statusItem.menu = statusMenu
+`</pre>
+
+<p>运行一下，你应该看到状态栏icon了。</p>
+<h3 id="五、重构下代码"><a href="#五、重构下代码" class="headerlink" title="五、重构下代码"></a>五、重构下代码</h3><p>如果我们进一步写下去，你会发现大量代码在AppDelegate中，我们不希望这样。下面我们为Menu创建一个Controller来管理。</p>
+</li>
+<li><p>新建一个NSObject的StatusMenuController.swift, File ⟶ New File ⟶ OS X Source ⟶ Cocoa Class ⟶ Next<br><img src="http://img.blog.csdn.net/20160728105928671" alt="这里写图片描述"></p>
+<p>代码如下：</p>
+<pre>`// StatusMenuController.swift
+
+import Cocoa
+
+class StatusMenuController: NSObject {
+    @IBOutlet weak var statusMenu: NSMenu!
+
+    let statusItem = NSStatusBar.systemStatusBar().statusItemWithLength(NSVariableStatusItemLength)
+
+    override func awakeFromNib() {
+        let icon = NSImage(named: "statusIcon")
+        icon?.template = true // best for dark mode
+        statusItem.image = icon
+        statusItem.menu = statusMenu
+    }
+
+    @IBAction func quitClicked(sender: NSMenuItem) {
+        NSApplication.sharedApplication().terminate(self)
+    }
+}
+`</pre>
+</li>
+<li><p>还原AppDelegate，修改为如下：</p>
+<pre>`// AppDelegate.swift
+
+import Cocoa
+
+@NSApplicationMain
+class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(aNotification: NSNotification) {
+        // Insert code here to initialize your application
+    }
+    func applicationWillTerminate(aNotification: NSNotification) {
+        // Insert code here to tear down your application
+    }
+}
+`</pre>
+
+<p>注意，因为删除了AppDelegate中的Outlet注册，所以你需要重新连Outlet，但在这之前我们需要先做一件事。（你可以试试连接StatusMenuController中的Outlet，看看会怎么样？）</p>
+</li>
+<li><p>打开MainMenu.xib，添加一个Object。<br><img src="http://img.blog.csdn.net/20160728110438220" alt="这里写图片描述"><br>将该Object的Class指定为StatusMenuController<br><img src="http://img.blog.csdn.net/20160728110530814" alt="这里写图片描述"><br>重建Outlet到StatusMenuController，注意删除之前连接到AppDelegate的Outlet<br><img src="http://img.blog.csdn.net/20160728110646013" alt="这里写图片描述"></p>
+<p>当MainMenu.xib被初始化的时候，StatusMenuController下的awakeFromNib将会被执行，所以我们在里面做初始化工作。</p>
+<p>运行一下，保证你全部正常工作了。</p>
+<h3 id="六、天气Api"><a href="#六、天气Api" class="headerlink" title="六、天气Api"></a>六、天气Api</h3><p>我们使用 <a href="http://openweathermap.org" target="_blank" rel="external">OpenWeatherMap</a>的天气数据，所以你得<a href="https://home.openweathermap.org/users/sign_up" target="_blank" rel="external">注册一个账号</a>，获取到免费的API Key。</p>
+</li>
+<li><p>添加WeatherAPI.swift， File ⟶ New File ⟶ OS X Source ⟶ Swift File ⟶ WeatherAPI.swift，加入如下代码，并使用你自己的API Key。</p>
+<pre>`import Foundation
+
+class WeatherAPI {
+    let API_KEY = "your-api-key-here"
+    let BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
+
+    func fetchWeather(query: String) {
+        let session = NSURLSession.sharedSession()
+        // url-escape the query string we're passed
+        let escapedQuery = query.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())
+        let url = NSURL(string: "\(BASE_URL)?APPID=\(API_KEY)&amp;units=imperial&amp;q=\(escapedQuery!)")
+        let task = session.dataTaskWithURL(url!) { data, response, err in
+            // first check for a hard error
+            if let error = err {
+                NSLog("weather api error: \(error)")
+            }
+
+            // then check the response code
+            if let httpResponse = response as? NSHTTPURLResponse {
+                switch httpResponse.statusCode {
+                case 200: // all good!
+                    let dataString = NSString(data: data!, encoding: NSUTF8StringEncoding) as! String
+                    NSLog(dataString)
+                case 401: // unauthorized
+                    NSLog("weather api returned an 'unauthorized' response. Did you set your API key?")
+                default:
+                    NSLog("weather api returned response: %d %@", httpResponse.statusCode, NSHTTPURLResponse.localizedStringForStatusCode(httpResponse.statusCode))
+                }
+            }
+        }
+        task.resume()
+    }
+}
+`</pre>
+</li>
+<li><p>添加一个Update子菜单到Status Menu。<br><img src="http://img.blog.csdn.net/20160728111354459" alt="这里写图片描述"><br>绑定Action到StatusMenuController.swift，取名为updateClicked</p>
+</li>
+<li><p>开始使用WeatherAPI， 在StatusMenuController中let statusItem下面加入：<br><code>let weatherAPI = WeatherAPI()</code>,    在updateClicked中加入：<br><code>weatherAPI.fetchWeather(&quot;Seattle&quot;)</code></p>
+<p>注意OSX 10.11之后请添加NSAppTransportSecurity，保证http能使用。</p>
+<p>运行一下，然后点击Update菜单。你会收到一个json格式的天气数据。</p>
+</li>
+<li><p>我们再调整下StatusMenuController代码, 添加一个updateWeather函数，修改后如下：</p>
+<pre>`import Cocoa
+
+class StatusMenuController: NSObject {
+    @IBOutlet weak var statusMenu: NSMenu!
+
+    let statusItem = NSStatusBar.systemStatusBar().statusItemWithLength(NSVariableStatusItemLength)
+    let weatherAPI = WeatherAPI()
+
+    override func awakeFromNib() {
+        statusItem.menu = statusMenu
+        let icon = NSImage(named: "statusIcon")
+        icon?.template = true // best for dark mode
+        statusItem.image = icon
+        statusItem.menu = statusMenu
+
+        updateWeather()
+    }
+
+    func updateWeather() {
+        weatherAPI.fetchWeather("Seattle")
+    }
+
+    @IBAction func updateClicked(sender: NSMenuItem) {
+        updateWeather()
+    }
+
+    @IBAction func quitClicked(sender: NSMenuItem) {
+        NSApplication.sharedApplication().terminate(self)
+    }
+}
+`</pre>
+
+<h3 id="七、解析Json"><a href="#七、解析Json" class="headerlink" title="七、解析Json"></a>七、解析Json</h3><p>你可以使用 SwiftyJSON，但本次我们先不使用第三方库。我们得到的天气数据如下：</p>
+<pre>`{
+    "coord": {
+        "lon": -122.33,
+        "lat": 47.61
+    },
+    "weather": [{
+        "id": 800,
+        "main": "Clear",
+        "description": "sky is clear",
+        "icon": "01n"
+    }],
+    "base": "cmc stations",
+    "main": {
+        "temp": 57.45,
+        "pressure": 1018,
+        "humidity": 59,
+        "temp_min": 53.6,
+        "temp_max": 62.6
+    },
+    "wind": {
+        "speed": 2.61,
+        "deg": 19.5018
+    },
+    "clouds": {
+        "all": 1
+    },
+    "dt": 1444623405,
+    "sys": {
+        "type": 1,
+        "id": 2949,
+        "message": 0.0065,
+        "country": "US",
+        "sunrise": 1444659833,
+        "sunset": 1444699609
+    },
+    "id": 5809844,
+    "name": "Seattle",
+    "cod": 200
+}
+`</pre>
+</li>
+<li><p>在WeatherAPI.swift添加天气结构体用于解析son</p>
+<pre>`struct Weather {
+    var city: String
+    var currentTemp: Float
+    var conditions: String
+}
+`</pre>
+</li>
+<li><p>解析son</p>
+<pre>` func weatherFromJSONData(data: NSData) -&gt; Weather? {
+        typealias JSONDict = [String:AnyObject]
+        let json : JSONDict
+
+        do {
+            json = try NSJSONSerialization.JSONObjectWithData(data, options: []) as! JSONDict
+        } catch {
+            NSLog("JSON parsing failed: \(error)")
+            return nil
+        }
+
+        var mainDict = json["main"] as! JSONDict
+        var weatherList = json["weather"] as! [JSONDict]
+        var weatherDict = weatherList[0]
+
+        let weather = Weather(
+            city: json["name"] as! String,
+            currentTemp: mainDict["temp"] as! Float,
+            conditions: weatherDict["main"] as! String
+        )
+
+        return weather
+    }
+`</pre>
+</li>
+<li><p>修改fetchWeather函数去调用weatherFromJSONData</p>
+<pre>`let task = session.dataTaskWithURL(url!) { data, response, error in
+        // first check for a hard error
+    if let error = err {
+        NSLog("weather api error: \(error)")
+    }
+
+    // then check the response code
+    if let httpResponse = response as? NSHTTPURLResponse {
+        switch httpResponse.statusCode {
+        case 200: // all good!
+            if let weather = self.weatherFromJSONData(data!) {
+                NSLog("\(weather)")
+            }
+        case 401: // unauthorized
+            NSLog("weather api returned an 'unauthorized' response. Did you set your API key?")
+        default:
+            NSLog("weather api returned response: %d %@", httpResponse.statusCode, NSHTTPURLResponse.localizedStringForStatusCode(httpResponse.statusCode))
+        }
+    }
+}
+`</pre>
+
+<p>如果此时你运行，你会收到</p>
+<pre>`2016-07-28 11:25:08.457 WeatherBar[49688:1998824] Optional(WeatherBar.Weather(city: "Seattle", currentTemp: 51.6, conditions: "Clouds"))
+`</pre>
+</li>
+<li><p>给Weather结构体添加一个description</p>
+<pre>`struct Weather: CustomStringConvertible {
+    var city: String
+    var currentTemp: Float
+    var conditions: String
+
+    var description: String {
+        return "\(city): \(currentTemp)F and \(conditions)"
+    }
+}
+`</pre>
+
+<p>再运行试试。</p>
+<h3 id="八、Weather用到Controller中"><a href="#八、Weather用到Controller中" class="headerlink" title="八、Weather用到Controller中"></a>八、Weather用到Controller中</h3></li>
+<li><p>在 WeatherAPI.swift中增加delegate协议</p>
+<pre>`protocol WeatherAPIDelegate {
+    func weatherDidUpdate(weather: Weather)
+}
+`</pre>
+</li>
+<li><p>声明<code>var delegate: WeatherAPIDelegate?</code></p>
+</li>
+<li><p>添加初始化</p>
+<pre>`init(delegate: WeatherAPIDelegate) {
+    self.delegate = delegate
+}
+`</pre>
+</li>
+<li><p>修改fetchWeather</p>
+<pre>`let task = session.dataTaskWithURL(url!) { data, response, error in
+    // first check for a hard error
+    if let error = err {
+        NSLog("weather api error: \(error)")
+    }
+
+    // then check the response code
+    if let httpResponse = response as? NSHTTPURLResponse {
+        switch httpResponse.statusCode {
+        case 200: // all good!
+            if let weather = self.weatherFromJSONData(data!) {
+                self.delegate?.weatherDidUpdate(weather)
+            }
+        case 401: // unauthorized
+            NSLog("weather api returned an 'unauthorized' response. Did you set your API key?")
+        default:
+            NSLog("weather api returned response: %d %@", httpResponse.statusCode, NSHTTPURLResponse.localizedStringForStatusCode(httpResponse.statusCode))
+        }
+    }
+}
+`</pre>
+</li>
+<li><p>StatusMenuController添加WeatherAPIDelegate</p>
+<pre>`class StatusMenuController: NSObject, WeatherAPIDelegate {
+...
+  var weatherAPI: WeatherAPI!
+
+  override func awakeFromNib() {
+    ...
+    weatherAPI = WeatherAPI(delegate: self)
+    updateWeather()
+  }
+  ...
+  func weatherDidUpdate(weather: Weather) {
+    NSLog(weather.description)
+  }
+  ...
+`</pre>
+</li>
+<li><p>Callback实现，修改WeatherAPI.swift中fetchWeather：<br><code>func fetchWeather(query: String, success: (Weather) -&amp;gt; Void) {</code><br>修改fetchWeather内容</p>
+<pre>`let task = session.dataTaskWithURL(url!) { data, response, error in
+    // first check for a hard error
+    if let error = err {
+        NSLog("weather api error: \(error)")
+    }
+
+    // then check the response code
+    if let httpResponse = response as? NSHTTPURLResponse {
+        switch httpResponse.statusCode {
+        case 200: // all good!
+            if let weather = self.weatherFromJSONData(data!) {
+                success(weather)
+            }
+        case 401: // unauthorized
+            NSLog("weather api returned an 'unauthorized' response. Did you set your API key?")
+        default:
+            NSLog("weather api returned response: %d %@", httpResponse.statusCode, NSHTTPURLResponse.localizedStringForStatusCode(httpResponse.statusCode))
+        }
+    }
+}
+`</pre>
+</li>
+<li><p>在controller中</p>
+<pre>`func updateWeather() {
+    weatherAPI.fetchWeather("Seattle, WA") { weather in
+        NSLog(weather.description)
+    }
+}
+`</pre>
+
+<p>运行一下，确保都正常。</p>
+<h3 id="九、显示天气"><a href="#九、显示天气" class="headerlink" title="九、显示天气"></a>九、显示天气</h3><p>在MainMenu.xib中添加子菜单 “Weather”（你可以添加2个Separator Menu Item用于子菜单分割线）<br><img src="http://img.blog.csdn.net/20160728113405031" alt="这里写图片描述"></p>
+<p>在updateWeather中，替换NSLog:</p>
+<pre>`if let weatherMenuItem = self.statusMenu.itemWithTitle("Weather") {
+    weatherMenuItem.title = weather.description
+}
+`</pre>
+
+<p>运行一下，看看天气是不是显示出来了。</p>
+<h3 id="十、创建一个天气视图"><a href="#十、创建一个天气视图" class="headerlink" title="十、创建一个天气视图"></a>十、创建一个天气视图</h3><p>打开MainMenu.xib，拖一个Custom View进来。</p>
+</li>
+<li><p>拖一个Image View到Custom View中，设置ImageView宽高度为50。<br><img src="http://img.blog.csdn.net/20160728113814071" alt="这里写图片描述"></p>
+</li>
+<li>拖两个Label进来，分别为City和Temperature<br><img src="http://img.blog.csdn.net/20160728113930033" alt="这里写图片描述"></li>
+<li>创建一个名为WeatherView的NSView，New File ⟶ OS X Source ⟶ Cocoa Class<br>在MainMenu.xib中，将Custom View的Class指定为WeatherView<br><img src="http://img.blog.csdn.net/20160728114119091" alt="这里写图片描述"></li>
+<li><p>绑定WeatherView Outlet：</p>
+<pre>`import Cocoa
+
+class WeatherView: NSView {
+    @IBOutlet weak var imageView: NSImageView!
+    @IBOutlet weak var cityTextField: NSTextField!
+    @IBOutlet weak var currentConditionsTextField: NSTextField!
+}
+`</pre>
+
+<p>并添加update:</p>
+<pre>`func update(weather: Weather) {
+    // do UI updates on the main thread
+    dispatch_async(dispatch_get_main_queue()) {
+        self.cityTextField.stringValue = weather.city
+        self.currentConditionsTextField.stringValue = "\(Int(weather.currentTemp))°F and \(weather.conditions)"
+        self.imageView.image = NSImage(named: weather.icon)
+    }
+}
+`</pre>
+
+<p>注意这里使用dispatch_async调用UI线程来刷新UI，因为后面调用此函数的数据来源于网络请求子线程。</p>
+</li>
+<li><p>StatusMenuController添加weatherView outlet</p>
+<pre>`class StatusMenuController: NSObject {
+    @IBOutlet weak var statusMenu: NSMenu!
+    @IBOutlet weak var weatherView: WeatherView!
+    var weatherMenuItem: NSMenuItem!
+    ...
+`</pre>
+</li>
+<li><p>子菜单Weather绑定到视图</p>
+<pre>`weatherMenuItem = statusMenu.itemWithTitle("Weather")
+weatherMenuItem.view = weatherView
+`</pre>
+</li>
+<li><p>update中：</p>
+<pre>`func updateWeather() {
+    weatherAPI.fetchWeather("Seattle, WA") { weather in
+        self.weatherView.update(weather)
+    }
+}
+`</pre>
+
+<p>运行一下。</p>
+<h3 id="十一、添加天气图片"><a href="#十一、添加天气图片" class="headerlink" title="十一、添加天气图片"></a>十一、添加天气图片</h3><p>先添加天气素材到Xcode，天气素材可以在<a href="http://openweathermap.org/weather-conditions" target="_blank" rel="external">http://openweathermap.org/weather-conditions</a> 这里找到。这里我已经提供了一份<a href="http://footle.org/WeatherBar/assets/weather-icons.zip" target="_blank" rel="external">icon zip</a>, 解压后放Xcode。<br><img src="http://img.blog.csdn.net/20160728115142069" alt="这里写图片描述"></p>
+</li>
+<li><p>WeatherAPI.swift的Weather struct中，添加 <code>var icon: String</code></p>
+</li>
+<li><p>在weatherFromJSONData中：</p>
+<pre>`let weather = Weather(
+    city: json["name"] as! String,
+    currentTemp: mainDict["temp"] as! Float,
+    conditions: weatherDict["main"] as! String,
+    icon: weatherDict["icon"] as! String
+)
+`</pre>
+</li>
+<li><p>在weatherFromJSONData：</p>
+<pre>`let weather = Weather(
+    city: json["name"] as! String,
+    currentTemp: mainDict["temp"] as! Float,
+    conditions: weatherDict["main"] as! String,
+    icon: weatherDict["icon"] as! String
+)
+`</pre>
+</li>
+<li><p>在WeatherView的update中：</p>
+<pre>`imageView.image = NSImage(named: weather.icon)
+`</pre>
+
+<p>运行一下，Pretty!</p>
+<p><img src="http://img.blog.csdn.net/20160728115416945" alt="这里写图片描述"></p>
+<h3 id="十二、添加设置"><a href="#十二、添加设置" class="headerlink" title="十二、添加设置"></a>十二、添加设置</h3><p>在MainMenu.xib MenuItem中，添加一个Menu Item命名为“Preferences…”<br>并绑定action，命名为“preferencesClicked”</p>
+</li>
+<li><p>添加NSWindowController命名为PreferencesWindow.swift New ⟶ File ⟶ OS X Source ⟶ Cocoa Class , 勾选同时创建XIB.在XIB中添加Label和Text Field。效果如下：<br><img src="http://img.blog.csdn.net/20160728115751650" alt="这里写图片描述"></p>
+<p>Outlet cityTextField到PreferencesWindow.swift</p>
+</li>
+<li><p>在PreferencesWindow.swift中添加：</p>
+<pre>`override var windowNibName : String! {
+    return "PreferencesWindow"
+}
+`</pre>
+</li>
+<li><p>windowDidLoad()中修改：</p>
+<pre>`self.window?.center()
+self.window?.makeKeyAndOrderFront(nil)
+NSApp.activateIgnoringOtherApps(true)
+`</pre>
+</li>
+<li><p>最终PreferencesWindow.swift如下：</p>
+<pre>`import Cocoa
+
+class PreferencesWindow: NSWindowController {
+    @IBOutlet weak var cityTextField: NSTextField!
+
+    override var windowNibName : String! {
+        return "PreferencesWindow"
+    }
+
+    override func windowDidLoad() {
+        super.windowDidLoad()
+
+        self.window?.center()
+        self.window?.makeKeyAndOrderFront(nil)
+        NSApp.activateIgnoringOtherApps(true)
+    }
+}
+`</pre>
+</li>
+<li><p>StatusMenuController.swift中添加preferencesWindow<br><code>var preferencesWindow: PreferencesWindow!</code></p>
+</li>
+<li>awakeFromNib中，注意在updateWeather()之前：<br><code>preferencesWindow = PreferencesWindow()</code></li>
+<li>preferencesClicked中：<br><code>preferencesWindow.showWindow(nil)</code></li>
+<li><p>下面为 preferences window 添加NSWindowDelegate，刷新视图。<br><code>class PreferencesWindow: NSWindowController, NSWindowDelegate {</code><br>并增加</p>
+<pre>`func windowWillClose(notification: NSNotification) {
+    let defaults = NSUserDefaults.standardUserDefaults()
+    defaults.setValue(cityTextField.stringValue, forKey: "city")
+}
+`</pre>
+
+<p>增加协议:</p>
+<pre>`protocol PreferencesWindowDelegate {
+    func preferencesDidUpdate()
+}
+`</pre>
+
+<p>增加delegate:</p>
+<pre>`var delegate: PreferencesWindowDelegate?
+`</pre>
+
+<p>在windowWillClose最下面调用</p>
+<pre>`delegate?.preferencesDidUpdate()
+`</pre>
+</li>
+<li><p>回到StatusMenuController中，添加PreferencesWindowDelegate</p>
+<pre>`class StatusMenuController: NSObject, PreferencesWindowDelegate {
+`</pre>
+
+<p>实现代理：</p>
+<pre>`func preferencesDidUpdate() {
+    updateWeather()
+}
+`</pre>
+
+<p>awakeFromNib中：</p>
+<pre>`preferencesWindow = PreferencesWindow()
+preferencesWindow.delegate = self
+`</pre>
+</li>
+<li><p>在StatusMenuController中增加默认城市<br>let DEFAULT_CITY = “Seattle, WA”</p>
+</li>
+<li><p>修改updateWeather</p>
+<pre>`func updateWeather() {
+    let defaults = NSUserDefaults.standardUserDefaults()
+    let city = defaults.stringForKey("city") ?? DEFAULT_CITY
+    weatherAPI.fetchWeather(city) { weather in
+        self.weatherView.update(weather)
+    }
+}
+`</pre>
+</li>
+<li><p>咱们也可以在PreferencesWindow.swift windowDidLoad中设置city默认值</p>
+<p><pre>`let defaults = NSUserDefaults.standardUserDefaults()<br>let city = defaults.stringForKey(“city”) ?? DEFAULT_CITY<br>cityTextField.stringValue = city</pre></p>
+</li>
+</ul>
+<p>运行。一切OK。</p>
+<p>其他：</p>
+<ul>
+<li>你也可以试试使用<code>NSRunLoop.mainRunLoop().addTimer(refreshTimer!, forMode: NSRunLoopCommonModes)</code> 来定时updateWeather.</li>
+<li>试试点击天气后跳转到天气中心 <code>NSWorkspace.sharedWorkspace().openURL(url: NSURL))</code></li>
+<li>完整工程： <a href="https://github.com/PlayApple/WeatherBar" target="_blank" rel="external">WeatherBar</a></li>
+</ul>
+</div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://playapple.github.io/2016/07/30/e4-bd-bf-e7-94-a8swift-e5-bc-80-e5-8f-91-e4-b8-80-e4-b8-aamacos-e7-9a-84-e8-8f-9c-e5-8d-95-e7-8a-b6-e6-80-81-e6-a0-8fapp/" data-id="civuuyatx0070476rl7k0grpz" class="article-share-link">Aktie</a><div class="tags"><a href="/tags/Swift/">Swift</a></div><div class="post-nav"><a href="/2016/07/30/macos-e7-9a-84-e8-8f-9c-e5-8d-95-e7-8a-b6-e6-80-81-e6-a0-8fapp-e6-b7-bb-e5-8a-a0-e9-a5-bc-e5-9e-8b-e8-bf-9b-e5-ba-a6/" class="pre">MacOS的菜单状态栏App添加饼型进度</a><a href="/2016/07/15/swift-e4-b8-ad-e5-ae-9e-e7-8e-b0observable-e6-9c-ba-e5-88-b6/" class="next">Swift中实现Observable机制</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="http://playapple.github.io"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Kategorien</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Android/Cocos2D-X/">Cocos2D-X</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Box2D/">Box2D</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Box2D/Cocos2D-X/">Cocos2D-X</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Cocos2D-X/">Cocos2D-X</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Cocos2D-X/IPhone/">IPhone</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Cocos2D-X/Unity3D/">Unity3D</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Code/">Code</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Diary/">Diary</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/IPhone/">IPhone</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/IPhone/Swift/">Swift</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Project/">Project</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Swift/">Swift</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Unity3D/">Unity3D</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/Swift/" style="font-size: 15px;">Swift</a> <a href="/tags/Singleton/" style="font-size: 15px;">Singleton</a> <a href="/tags/Light/" style="font-size: 15px;">Light</a> <a href="/tags/Material/" style="font-size: 15px;">Material</a> <a href="/tags/Unity3D/" style="font-size: 15px;">Unity3D</a> <a href="/tags/TelephonyManager/" style="font-size: 15px;">TelephonyManager</a> <a href="/tags/WebView/" style="font-size: 15px;">WebView</a> <a href="/tags/Auto/" style="font-size: 15px;">Auto</a> <a href="/tags/Create-Editable-Copy/" style="font-size: 15px;">Create Editable Copy</a> <a href="/tags/Font/" style="font-size: 15px;">Font</a> <a href="/tags/Unity/" style="font-size: 15px;">Unity</a> <a href="/tags/Blue-Path/" style="font-size: 15px;">Blue Path</a> <a href="/tags/Box2D/" style="font-size: 15px;">Box2D</a> <a href="/tags/内存回收/" style="font-size: 15px;">内存回收</a> <a href="/tags/hd/" style="font-size: 15px;">hd</a> <a href="/tags/Retina/" style="font-size: 15px;">Retina</a> <a href="/tags/cocos2d-x/" style="font-size: 15px;">cocos2d-x</a> <a href="/tags/动画/" style="font-size: 15px;">动画</a> <a href="/tags/CCControlColourPicker/" style="font-size: 15px;">CCControlColourPicker</a> <a href="/tags/CCControlSlider/" style="font-size: 15px;">CCControlSlider</a> <a href="/tags/CCControlSwitch/" style="font-size: 15px;">CCControlSwitch</a> <a href="/tags/ListView/" style="font-size: 15px;">ListView</a> <a href="/tags/CCScale9Sprite/" style="font-size: 15px;">CCScale9Sprite</a> <a href="/tags/九宫格图/" style="font-size: 15px;">九宫格图</a> <a href="/tags/CCSprite/" style="font-size: 15px;">CCSprite</a> <a href="/tags/灰白图/" style="font-size: 15px;">灰白图</a> <a href="/tags/mp4/" style="font-size: 15px;">mp4</a> <a href="/tags/AR虚拟现实/" style="font-size: 15px;">AR虚拟现实</a> <a href="/tags/CCUserDefault/" style="font-size: 15px;">CCUserDefault</a> <a href="/tags/CCLabelAtlas/" style="font-size: 15px;">CCLabelAtlas</a> <a href="/tags/UIWebView/" style="font-size: 15px;">UIWebView</a> <a href="/tags/CCSpriteBatchNode/" style="font-size: 15px;">CCSpriteBatchNode</a> <a href="/tags/CCOrbitCamera/" style="font-size: 15px;">CCOrbitCamera</a> <a href="/tags/翻牌效果/" style="font-size: 15px;">翻牌效果</a> <a href="/tags/适配iphone-ipad/" style="font-size: 15px;">适配iphone-ipad</a> <a href="/tags/clash-of-clans/" style="font-size: 15px;">clash of clans</a> <a href="/tags/Zoom/" style="font-size: 15px;">Zoom</a> <a href="/tags/多点聚焦缩放/" style="font-size: 15px;">多点聚焦缩放</a> <a href="/tags/post/" style="font-size: 15px;">post</a> <a href="/tags/socket/" style="font-size: 15px;">socket</a> <a href="/tags/cocos2dx/" style="font-size: 15px;">cocos2dx</a> <a href="/tags/lua/" style="font-size: 15px;">lua</a> <a href="/tags/摇杆/" style="font-size: 15px;">摇杆</a> <a href="/tags/UIDatePicker/" style="font-size: 15px;">UIDatePicker</a> <a href="/tags/手势/" style="font-size: 15px;">手势</a> <a href="/tags/UILocalNotification/" style="font-size: 15px;">UILocalNotification</a> <a href="/tags/airdrop/" style="font-size: 15px;">airdrop</a> <a href="/tags/ios7/" style="font-size: 15px;">ios7</a> <a href="/tags/子弹/" style="font-size: 15px;">子弹</a> <a href="/tags/技能CD/" style="font-size: 15px;">技能CD</a> <a href="/tags/摄像头/" style="font-size: 15px;">摄像头</a> <a href="/tags/陀螺仪/" style="font-size: 15px;">陀螺仪</a> <a href="/tags/JsonCpp/" style="font-size: 15px;">JsonCpp</a> <a href="/tags/Lua面向对象/" style="font-size: 15px;">Lua面向对象</a> <a href="/tags/Coroutine/" style="font-size: 15px;">Coroutine</a> <a href="/tags/众神召唤/" style="font-size: 15px;">众神召唤</a> <a href="/tags/DontDestroyOnLoad/" style="font-size: 15px;">DontDestroyOnLoad</a> <a href="/tags/delegate/" style="font-size: 15px;">delegate</a> <a href="/tags/event/" style="font-size: 15px;">event</a> <a href="/tags/handle/" style="font-size: 15px;">handle</a> <a href="/tags/2DSprite/" style="font-size: 15px;">2DSprite</a> <a href="/tags/内存泄露/" style="font-size: 15px;">内存泄露</a> <a href="/tags/Mesh/" style="font-size: 15px;">Mesh</a> <a href="/tags/UV/" style="font-size: 15px;">UV</a> <a href="/tags/CandyCrushSaga/" style="font-size: 15px;">CandyCrushSaga</a> <a href="/tags/大话骰/" style="font-size: 15px;">大话骰</a> <a href="/tags/ScriptTemplates/" style="font-size: 15px;">ScriptTemplates</a> <a href="/tags/明星总动员/" style="font-size: 15px;">明星总动员</a> <a href="/tags/Splash/" style="font-size: 15px;">Splash</a> <a href="/tags/MoveTowards/" style="font-size: 15px;">MoveTowards</a> <a href="/tags/截屏/" style="font-size: 15px;">截屏</a> <a href="/tags/texture/" style="font-size: 15px;">texture</a> <a href="/tags/UITableViewCell/" style="font-size: 15px;">UITableViewCell</a> <a href="/tags/龟兔再跑/" style="font-size: 15px;">龟兔再跑</a> <a href="/tags/www/" style="font-size: 15px;">www</a> <a href="/tags/IAB/" style="font-size: 15px;">IAB</a> <a href="/tags/摇晃手机/" style="font-size: 15px;">摇晃手机</a> <a href="/tags/dispatch-once/" style="font-size: 15px;">dispatch_once</a> <a href="/tags/单例/" style="font-size: 15px;">单例</a> <a href="/tags/Admob/" style="font-size: 15px;">Admob</a> <a href="/tags/iOS/" style="font-size: 15px;">iOS</a> <a href="/tags/WWDR/" style="font-size: 15px;">WWDR</a> <a href="/tags/签发者无效/" style="font-size: 15px;">签发者无效</a> <a href="/tags/plist/" style="font-size: 15px;">plist</a> <a href="/tags/Game-Center/" style="font-size: 15px;">Game Center</a> <a href="/tags/in-App-Purchases/" style="font-size: 15px;">in-App Purchases</a> <a href="/tags/iOS8/" style="font-size: 15px;">iOS8</a> <a href="/tags/ImageMagick/" style="font-size: 15px;">ImageMagick</a> <a href="/tags/libpng/" style="font-size: 15px;">libpng</a> <a href="/tags/MonoDevelop/" style="font-size: 15px;">MonoDevelop</a> <a href="/tags/hosts/" style="font-size: 15px;">hosts</a> <a href="/tags/MonoBehaviour/" style="font-size: 15px;">MonoBehaviour</a> <a href="/tags/certificate/" style="font-size: 15px;">certificate</a> <a href="/tags/Provisioning/" style="font-size: 15px;">Provisioning</a> <a href="/tags/AutoRotation/" style="font-size: 15px;">AutoRotation</a> <a href="/tags/Orientation/" style="font-size: 15px;">Orientation</a> <a href="/tags/Unity5/" style="font-size: 15px;">Unity5</a> <a href="/tags/PhoneGap/" style="font-size: 15px;">PhoneGap</a> <a href="/tags/quick-lua/" style="font-size: 15px;">quick-lua</a> <a href="/tags/Google-Play-Games-libraries/" style="font-size: 15px;">Google Play Games libraries</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Letzte</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/11/23/swift-e4-b8-8b-e5-a4-9a-e4-b8-aastoryboard-e7-9a-84-e9-a1-b9-e7-9b-ae-e7-bb-93-e6-9e-84/">Swift下多个Storyboard的项目结构</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/30/macos-e7-9a-84-e8-8f-9c-e5-8d-95-e7-8a-b6-e6-80-81-e6-a0-8fapp-e6-b7-bb-e5-8a-a0-e9-a5-bc-e5-9e-8b-e8-bf-9b-e5-ba-a6/">MacOS的菜单状态栏App添加饼型进度</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/30/e4-bd-bf-e7-94-a8swift-e5-bc-80-e5-8f-91-e4-b8-80-e4-b8-aamacos-e7-9a-84-e8-8f-9c-e5-8d-95-e7-8a-b6-e6-80-81-e6-a0-8fapp/">使用Swift开发一个MacOS的菜单状态栏App</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/15/swift-e4-b8-ad-e5-ae-9e-e7-8e-b0observable-e6-9c-ba-e5-88-b6/">Swift中实现Observable机制</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/29/e7-9b-91-e5-90-ac-e6-89-8b-e6-9c-ba-e6-88-aa-e5-b1-8f-e4-ba-8b-e4-bb-b6/">监听手机截屏事件</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/15/ios-e5-bc-80-e5-8f-91-e8-af-81-e4-b9-a6-e6-98-be-e7-a4-ba-e6-ad-a4-e8-af-81-e4-b9-a6-e7-9a-84-e7-ad-be-e5-8f-91-e8-80-85-e6-97-a0-e6-95-88-e8-a7-a3-e5-86-b3-e6-96-b9-e6-b3-95/">IOS开发证书显示“此证书的签发者无效”解决方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/15/unityeditor-e4-b8-8b-e6-96-87-e4-bb-b6-e6-93-8d-e4-bd-9c-e6-96-b9-e6-b3-95-e6-b1-87-e6-80-bb-ef-bc-88unity3d-e5-bc-80-e5-8f-91-e4-b9-8b-e4-ba-8c-e5-8d-81-e5-9b-9b-ef-bc-89/">UnityEditor下文件操作方法汇总（Unity3D开发之二十四）</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/11/ios9-replaykit-e5-bd-95-e5-88-b6-e8-a7-86-e9-a2-91/">iOS9 ReplayKit录制视频</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/09/11/unity-e4-bf-ae-e6-94-b9particles-render-material-ef-bc-88unity3d-e5-bc-80-e5-8f-91-e4-b9-8b-e4-ba-8c-e5-8d-81-e4-b8-89-ef-bc-89/">Unity修改Particles Render Material（Unity3D开发之二十三）</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/09/09/auto-create-editable-copy-font-ef-bc-88unity3d-e5-bc-80-e5-8f-91-e4-b9-8b-e4-ba-8c-e5-8d-81-e4-ba-8c-ef-bc-89/">Auto Create Editable Copy Font（Unity3D开发之二十二）</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Blogroll</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">© <a href="/." rel="nofollow">Play Apple.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="/css/jquery.fancybox.css?v=0.0.0"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

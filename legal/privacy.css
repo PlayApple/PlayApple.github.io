@@ -1,0 +1,39 @@
+
+* {margin:0; padding:0;}
+body, html {width:100%; background-color:#eee;}
+@font-face {
+	font-family:"iconfont";
+	src:url(s1.xmcdn.com/lib/common/last/font/1.0.0/enterprise-user-admin/iconfont.eot?t=1517982609714);
+	src:url(s1.xmcdn.com/lib/common/last/font/1.0.0/enterprise-user-admin/iconfont.eot?t=1517982609714#iefix) format("embedded-opentype"),
+		url("data:application/x-font-woff;charset=utf-8;base64,") format("woff"),
+		url(http://www.orangeapps.cn/filebox/iconfont.ttf?t=1) format("truetype"),
+		url(http://www.orangeapps.cn/filebox/iconfont.svg?t=1#iconfont) format("svg")
+}
+.iconfont {font-family:"iconfont"!important; font-size:22px; font-style:normal; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
+.icon-ximalayalogo:before {content:"\e631";}
+.statement {position:relative; width:100%; background-color:#eee;}
+.statement header {line-height:60px; background:#333; box-shadow:0 1px 2px 0 rgba(0,0,0,.08); color:#fff; font-family:PingFangSC-Light;}
+.statement header h1 {width:70%; position:relative; margin:auto; font-weight:400;}
+.statement section {width:100%;}
+.statement .content {width:70%; position:relative; background-color:#fff;
+		 			margin:auto; margin-top:30px; margin-bottom:30px; padding:50px 50px 75px; border:1px solid #e8e8e8; border-radius:1px;
+					box-sizing:border-box; -moz-box-sizing:border-box;/* Firefox */ -webkit-box-sizing:border-box;/* Safari */}
+.statement .content h2 {font-weight:normal; font-size:20px; text-align:center;}
+.statement .content .list {padding:20px 20px 0;}
+.statement .content .list p {margin-top:16px; line-height:24px; font-size:14px; color:#666; font-family:PingFangSC-Light; text-indent:2rem;}
+.statement .content .list ul {list-style:none;}
+.statement .content .list ul li {margin-top:30px;}
+.statement .content .list ul li .item {font-size:16px; color:#333; line-height:22px; font-family:PingFangSC-Medium;}
+.statement .content .list ul li .desc {margin-top:16px; line-height:24px; font-size:14px; color:#666; font-family:PingFangSC-Light; text-indent:2rem;}
+.statement .content .list ul li .desc span {display:block;}
+/* .statement footer {height:300px; background-color:#fff;} */
+@media screen and (max-width:768px) {
+	.statement header {display:none;}
+	.statement header h1 {width:90%;}
+	.statement .content {width:90%; padding:30px 5px 50px;}
+}
+@media screen and (max-width:468px) {
+	.statement header {display:none;}
+	.statement header h1 {width:95%;}
+	.statement .content {width:95%; padding:30px 3px 50px; margin-top:10px;}
+}
